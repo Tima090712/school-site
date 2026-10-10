@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МАОУ СОШ №23 — Екатеринбург</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;800&family=Literata:ital,opsz,wght@0,7..72,600;0,7..72,800;1,7..72,500&display=swap" rel="stylesheet">
+<script src="/socket.io/socket.io.js"></script>
+<script>try{var t=localStorage.getItem('school23_theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.classList.add('js')}catch(e){}</script>
+<style>
+:root{--bg:#F4F2EA;--card:#FFFFFF;--ink:#1F2D33;--mute:#738083;--line:#E7E3D6;--pri:#2F6B6F;--pri-d:#1F4C51;--pri-p:#E1EEEC;--on-pri:#fff;--acc:#E0A458;--acc-p:#FBF0DD;--acc-i:#8A5A1C;--h1:#1F4C51;--h2:#2F6B6F;--nav:rgba(244,242,234,.82);--sh:0 1px 2px rgba(31,45,51,.04),0 10px 30px rgba(31,76,81,.08);--glass:rgba(255,255,255,.1)}
+[data-theme=night]{--bg:#0F1519;--card:#18222A;--ink:#E7EEF0;--mute:#8A9AA0;--line:#243039;--pri:#6CC4BF;--pri-d:#9AE0DB;--pri-p:#1C3338;--on-pri:#0C1B1E;--acc:#F0B866;--acc-p:#2A2418;--acc-i:#F0B866;--h1:#0B2A31;--h2:#14474D;--nav:rgba(15,21,25,.8);--sh:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.25)}
+[data-theme=lavender]{--bg:#F5F3FB;--card:#FFFFFF;--ink:#26233A;--mute:#7C7A92;--line:#E6E2F3;--pri:#5B4BB7;--pri-d:#3F3290;--pri-p:#ECE8FA;--acc:#F0907A;--acc-p:#FDEBE6;--acc-i:#B2432C;--h1:#3A2E8C;--h2:#6C5BD0;--nav:rgba(245,243,251,.82);--sh:0 1px 2px rgba(38,35,58,.04),0 10px 30px rgba(91,75,183,.1)}
+[data-theme=sunset]{--bg:#FBF3EC;--card:#FFFFFF;--ink:#3A2620;--mute:#8C766C;--line:#EFE1D5;--pri:#C0553A;--pri-d:#8E3A25;--pri-p:#FAE6DD;--acc:#2F7D78;--acc-p:#DFF0EE;--acc-i:#1E5A56;--h1:#8E3A25;--h2:#D8704F;--nav:rgba(251,243,236,.82);--sh:0 1px 2px rgba(58,38,32,.04),0 10px 30px rgba(192,85,58,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{font-family:'Onest',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7;font-size:16px;transition:background .4s,color .4s}
+h1,h2,h3{font-family:'Onest',sans-serif;font-weight:700;letter-spacing:-.02em}
+em{font-family:'Literata',serif;font-weight:500}
+.card-t,.panel,.info-card,.contact-card,.schedule-wrap,.header-stat,.site-nav,.login-card,.field input,.chat-foot input,.ai-body textarea,.chat-msg .text{transition:background .4s,border-color .4s,color .4s}
+
+/* переключатель стиля */
+.themes{position:fixed;right:18px;bottom:18px;z-index:10001;display:flex;gap:8px;padding:8px 10px;border-radius:40px;background:var(--card);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.sw{width:26px;height:26px;border-radius:50%;border:0;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:inset 0 0 0 2px rgba(255,255,255,.7)}
+.sw:hover{transform:scale(1.15)}
+.sw.on{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--pri)}
+
+/* вход */
+#login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--h1),var(--h2));display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.login-card{background:var(--card);width:100%;max-width:400px;padding:40px 34px 34px;border-radius:28px;box-shadow:0 30px 70px rgba(0,0,0,.3);text-align:center}
+.login-logo{width:60px;height:60px;margin:0 auto 18px;border-radius:18px;background:linear-gradient(135deg,var(--acc),var(--pri));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:24px}
+.login-card h1{font-size:25px;line-height:1.25}
+.login-card p{color:var(--mute);font-size:14px;margin:4px 0 24px}
+.role-tabs{display:flex;background:var(--bg);padding:4px;border-radius:14px;margin-bottom:20px}
+.role-tab{flex:1;padding:10px;border:0;background:transparent;border-radius:11px;font:600 14px 'Onest',sans-serif;color:var(--mute);cursor:pointer;transition:.25s}
+.role-tab.active{background:var(--card);color:var(--pri);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.field{margin-bottom:14px;text-align:left}
+.field label{display:block;font-size:13px;color:var(--mute);margin-bottom:5px;font-weight:500}
+.field input{width:100%;padding:13px 15px;border:1.5px solid var(--line);border-radius:14px;background:var(--bg);font:16px 'Onest',sans-serif;color:var(--ink);outline:none}
+.field input:focus{border-color:var(--pri);box-shadow:0 0 0 4px var(--pri-p)}
+#password-field{display:none}#password-field.show{display:block}
+.login-btn{width:100%;margin-top:8px;padding:14px;background:linear-gradient(135deg,var(--pri),var(--pri-d));color:var(--on-pri);border:0;border-radius:14px;font:600 15px 'Onest',sans-serif;cursor:pointer;transition:.25s;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.2)}
+
+/* шапка */
+.site-header{background:linear-gradient(135deg,var(--h1),var(--h2));color:#F6F3EA;position:relative;overflow:hidden;border-radius:0 0 40px 40px}
+.site-header::before,.site-header::after{content:'';position:absolute;border-radius:50%;filter:blur(70px);opacity:.45;pointer-events:none}
+.site-header::before{width:420px;height:420px;background:var(--acc);right:-120px;top:-160px;opacity:.28}
+.site-header::after{width:360px;height:360px;background:#fff;left:-140px;bottom:-200px;opacity:.1}
+.header-top{max-width:1160px;margin:0 auto;padding:22px 24px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.header-brand{display:flex;align-items:center;gap:12px}
+.mark{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.95);color:var(--h1);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.18)}
+.name{font-weight:700;font-size:17px;line-height:1.2}
+.sub{font-size:13px;opacity:.7}
+.account-chip{display:none;align-items:center;gap:10px;background:var(--glass);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.16);padding:5px 16px 5px 5px;border-radius:40px}
+.account-chip .av{width:32px;height:32px;border-radius:50%;background:var(--acc);color:#2a1d08;display:flex;align-items:center;justify-content:center;font-weight:700}
+.account-chip .nm{font-size:14px;font-weight:600;line-height:1.2}
+.account-chip .rl{font-size:12px;opacity:.7}
+.header-hero{max-width:1160px;margin:0 auto;padding:64px 24px 0;position:relative;z-index:1}
+.big23{position:absolute;right:20px;top:-6px;font-weight:800;font-size:clamp(140px,24vw,320px);line-height:1;color:rgba(255,255,255,.06);user-select:none;letter-spacing:-.06em}
+.header-hero h1{font-size:clamp(34px,5.6vw,64px);line-height:1.08;max-width:11.5em;position:relative}
+.header-hero h1 em{font-style:italic;color:var(--acc);position:relative}
+.header-hero p{margin-top:22px;max-width:500px;font-size:18px;opacity:.82;position:relative}
+.header-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:56px;padding-bottom:52px}
+.header-stat{background:var(--glass);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:20px 22px;transition:transform .3s,background .3s}
+.header-stat:hover{transform:translateY(-4px);background:rgba(255,255,255,.16)}
+.header-stat .num{font-weight:800;font-size:clamp(26px,3.6vw,40px);line-height:1.1;letter-spacing:-.03em}
+.header-stat .lbl{font-size:13px;opacity:.72;margin-top:4px}
+
+/* навигация */
+.site-nav{background:var(--nav);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:sticky;top:0;z-index:100}
+.nav-inner{max-width:1160px;margin:0 auto;padding:12px 24px;display:flex;gap:6px;overflow-x:auto;justify-content:center}
+.nav-inner a{padding:9px 20px;border-radius:30px;text-decoration:none;color:var(--mute);font-size:14px;font-weight:600;white-space:nowrap;transition:.25s}
+.nav-inner a:hover{color:var(--ink);background:var(--pri-p)}
+.nav-inner a.active{background:var(--pri);color:var(--on-pri);box-shadow:0 6px 16px rgba(0,0,0,.14)}
+
+/* секции */
+.section{max-width:1160px;margin:0 auto;padding:84px 24px 8px}
+.section-head{margin-bottom:38px;max-width:660px}
+.eyebrow{display:inline-block;font-size:13px;font-weight:600;color:var(--pri);background:var(--pri-p);padding:5px 14px;border-radius:30px;margin-bottom:14px}
+.section-head h2{font-size:clamp(28px,4vw,44px);line-height:1.12}
+.section-head p{color:var(--mute);margin-top:12px;font-size:17px}
+
+/* о школе: bento */
+.info-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;counter-reset:c}
+.info-card{background:var(--card);border-radius:26px;padding:30px 28px 32px;box-shadow:var(--sh);transition:transform .3s,box-shadow .3s;grid-column:span 2;position:relative;overflow:hidden}
+.info-card:nth-child(1){grid-column:span 4;background:linear-gradient(135deg,var(--h1),var(--h2));color:#fff;min-height:240px;display:flex;flex-direction:column;justify-content:flex-end}
+.info-card:nth-child(1) h3{color:#fff;font-size:28px}.info-card:nth-child(1) p{color:rgba(255,255,255,.8);max-width:480px;font-size:16px}
+.info-card:nth-child(1)::before{background:rgba(255,255,255,.18);color:#fff}
+.info-card:nth-child(4){grid-column:span 4;background:var(--acc-p)}
+.info-card:hover{transform:translateY(-4px)}
+.info-card .icon{display:none}
+.info-card::before{counter-increment:c;content:counter(c);display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:14px;background:var(--pri-p);color:var(--pri);font-weight:700;margin-bottom:auto;margin-bottom:22px}
+.info-card:nth-child(1)::before{margin-bottom:auto}
+.info-card:nth-child(4)::before{background:var(--card);color:var(--acc-i)}
+.info-card h3{font-size:20px;margin-bottom:8px}
+.info-card p{font-size:15px;color:var(--mute)}
+.info-card:nth-child(4) p{color:var(--ink);opacity:.75}
+@media(max-width:900px){.info-card,.info-card:nth-child(n){grid-column:span 3}.info-card:nth-child(1),.info-card:nth-child(4){grid-column:span 6}}
+@media(max-width:560px){.info-card,.info-card:nth-child(n){grid-column:span 6}}
+
+/* расписание */
+.schedule-wrap{background:var(--card);border-radius:26px;box-shadow:var(--sh);overflow-x:auto;padding:10px 14px}
+.schedule-table{width:100%;border-collapse:separate;border-spacing:0 4px;min-width:420px}
+.schedule-table thead th{text-align:left;font-size:13px;font-weight:600;color:var(--mute);padding:12px 20px}
+.schedule-table td{padding:13px 20px;background:var(--bg);transition:background .25s}
+.schedule-table td:first-child{border-radius:14px 0 0 14px}.schedule-table td:last-child{border-radius:0 14px 14px 0}
+.schedule-table tbody tr:hover td{background:var(--pri-p)}
+.schedule-table .num{font-weight:800;font-size:20px;color:var(--pri);width:90px}
+.schedule-table .time{font-weight:600;font-variant-numeric:tabular-nums}
+.schedule-table .brk{color:var(--mute);font-size:14px}
+
+/* чат */
+.comm-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:20px}
+@media(max-width:900px){.comm-grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border-radius:28px;box-shadow:var(--sh);display:flex;flex-direction:column;height:580px;overflow:hidden}
+.panel-head{padding:18px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.panel-head h3{font-size:17px;display:flex;align-items:center;gap:10px}
+.panel-head .dot{width:9px;height:9px;border-radius:50%;background:#4DBB82;box-shadow:0 0 0 4px rgba(77,187,130,.2);animation:pl 2s infinite}
+@keyframes pl{50%{box-shadow:0 0 0 7px rgba(77,187,130,0)}}
+.panel-head .hint{font-size:12px;font-weight:600;color:var(--pri);background:var(--pri-p);padding:4px 12px;border-radius:20px}
+.chat-body{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px}
+.chat-body::-webkit-scrollbar{width:6px}.chat-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+.chat-msg{display:flex;gap:10px;max-width:86%;animation:up .35s ease}
+@keyframes up{from{opacity:0;transform:translateY(8px)}}
+.chat-msg.own{align-self:flex-end;flex-direction:row-reverse}
+.chat-msg .av{width:36px;height:36px;flex-shrink:0;border-radius:12px;background:var(--pri-p);color:var(--pri);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.chat-msg.own .av{background:var(--acc-p);color:var(--acc-i)}
+.chat-msg .body{min-width:0}
+.chat-msg .meta{display:flex;gap:8px;align-items:baseline;margin-bottom:4px}
+.chat-msg.own .meta{flex-direction:row-reverse}
+.chat-msg .nm{font-weight:600;font-size:13px}.chat-msg .tm{font-size:11px;color:var(--mute)}
+.chat-msg .text{background:var(--bg);padding:10px 16px;border-radius:6px 18px 18px 18px;font-size:15px;word-wrap:break-word}
+.chat-msg.own .text{background:linear-gradient(135deg,var(--pri),var(--pri-d));color:var(--on-pri);border-radius:18px 6px 18px 18px}
+.chat-foot{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--line)}
+.chat-foot input{flex:1;min-width:0;padding:13px 18px;border:1.5px solid var(--line);border-radius:30px;background:var(--bg);font:15px 'Onest',sans-serif;color:var(--ink);outline:none}
+.chat-foot input:focus{border-color:var(--pri);box-shadow:0 0 0 4px var(--pri-p)}
+.chat-foot button,.ai-btn{background:linear-gradient(135deg,var(--pri),var(--pri-d));color:var(--on-pri);border:0;border-radius:30px;font:600 14px 'Onest',sans-serif;padding:0 24px;cursor:pointer;transition:.25s}
+.chat-foot button:hover,.ai-btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.16)}
+.ai-body{flex:1;padding:22px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.ai-body textarea{width:100%;min-height:130px;padding:15px 16px;border:1.5px solid var(--line);border-radius:18px;background:var(--bg);font:15px 'Onest',sans-serif;color:var(--ink);resize:vertical;outline:none}
+.ai-body textarea:focus{border-color:var(--pri);box-shadow:0 0 0 4px var(--pri-p)}
+.ai-btn{padding:14px}
+.ai-answer{display:none;background:var(--pri-p);color:var(--ink);border-radius:18px;padding:16px 18px;font-size:15px}
+.ai-answer.show{display:block;animation:up .35s ease}
+
+/* контакты */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.contact-card{background:var(--card);border-radius:24px;padding:26px;box-shadow:var(--sh);transition:transform .3s}
+.contact-card:hover{transform:translateY(-4px)}
+.contact-card .lbl{font-size:13px;color:var(--pri);font-weight:600;margin-bottom:6px}
+.contact-card .val{font-size:18px;font-weight:600;line-height:1.45;letter-spacing:-.01em}
+
+footer{margin-top:100px;background:linear-gradient(135deg,var(--h1),var(--h2));color:rgba(255,255,255,.65);text-align:center;padding:40px 24px 90px;font-size:14px;border-radius:40px 40px 0 0}
+footer strong{color:var(--acc);font-weight:700}
+
+/* появление при прокрутке */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.js .rv.in{opacity:1;transform:none}
+@media(max-width:700px){.header-stats{grid-template-columns:1fr 1fr}.themes{right:10px;bottom:10px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.js .rv{opacity:1;transform:none}}
+
+/* ===== интерактив ===== */
+#prog{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--pri),var(--acc));z-index:10002;transition:width .1s}
+#toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,30px);background:var(--ink);color:var(--bg);padding:11px 22px;border-radius:30px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:.35s;z-index:10003;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toTop{position:fixed;right:18px;bottom:76px;width:46px;height:46px;border-radius:50%;border:0;background:var(--card);color:var(--pri);font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:0;transform:translateY(14px);pointer-events:none;transition:.3s;z-index:10000}
+#toTop.show{opacity:1;transform:none;pointer-events:auto}
+#toTop:hover{background:var(--pri);color:var(--on-pri)}
+.login-card{animation:pop .6s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{opacity:0;transform:scale(.93) translateY(14px)}}
+.header-hero h1{animation:up .9s both}.header-hero p{animation:up .9s .15s both}.header-stats{animation:up .9s .3s both}
+.site-header::before{animation:fl 14s ease-in-out infinite alternate}.site-header::after{animation:fl 18s ease-in-out infinite alternate-reverse}
+@keyframes fl{to{transform:translate(60px,40px) scale(1.15)}}
+.big23{transition:transform .25s ease-out}
+.info-card,.contact-card,.header-stat{position:relative}
+.contact-card{overflow:hidden;cursor:pointer}
+.info-card::after,.contact-card::after,.header-stat::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--pri) 16%,transparent),transparent 70%)}
+.info-card:nth-child(1)::after,.header-stat::after{background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.2),transparent 70%)}
+.info-card:hover::after,.contact-card:hover::after,.header-stat:hover::after{opacity:1}
+.login-btn,.chat-foot button,.ai-btn,.role-tab,.chip{position:relative;overflow:hidden}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);transform:scale(0);animation:rp .6s linear forwards;pointer-events:none}
+@keyframes rp{to{transform:scale(2.6);opacity:0}}
+.now{display:flex;align-items:center;gap:14px;background:var(--card);box-shadow:var(--sh);border-radius:20px;padding:14px 20px;margin-bottom:16px;flex-wrap:wrap}
+.now[hidden]{display:none}
+.now .pulse{width:10px;height:10px;border-radius:50%;background:#4DBB82;animation:pl 2s infinite}
+.now #nowText{font-weight:600;font-size:15px}
+.now .bar{flex:1;min-width:140px;height:8px;background:var(--bg);border-radius:8px;overflow:hidden}
+.now .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pri),var(--acc));border-radius:8px;transition:width 1s}
+.schedule-table tr.now td{background:var(--pri-p)}
+.schedule-table tr.now .num::after{content:'●';font-size:10px;margin-left:8px;color:#4DBB82;vertical-align:middle}
+.schedule-table tbody tr{cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:500 13px 'Onest',sans-serif;padding:7px 14px;border-radius:30px;cursor:pointer;transition:.2s}
+.chip:hover{border-color:var(--pri);background:var(--pri-p);color:var(--pri);transform:translateY(-1px)}
+.ai-body textarea{min-height:100px}
+.dots i{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--pri);animation:bn 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes bn{50%{transform:translateY(-5px);opacity:.4}}
+.emo-wrap{position:relative;align-self:center}
+.chat-foot .emo-btn{width:44px;height:44px;padding:0;font-size:20px;background:var(--bg);color:var(--ink);border-radius:50%}
+.chat-foot .emo-btn:hover{background:var(--pri-p);box-shadow:none}
+.emo-pop{position:absolute;bottom:54px;left:0;display:none;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 30px rgba(0,0,0,.18);z-index:5}
+.emo-pop.open{display:grid;animation:up .2s ease}
+.chat-foot .emo-pop button{width:40px;height:40px;padding:0;font-size:20px;background:transparent;border-radius:12px}
+.chat-foot .emo-pop button:hover{background:var(--pri-p);box-shadow:none;transform:scale(1.15)}
+</style>
+</head>
+<body>
+
+<div id="prog"></div><div id="toast"></div><button id="toTop" aria-label="Наверх">↑</button>
+<div class="themes" id="themes" aria-label="Стиль оформления">
+  <button class="sw" data-t="teal" title="Бирюза" style="background:linear-gradient(135deg,#2F6B6F 50%,#E0A458 50%)"></button>
+  <button class="sw" data-t="night" title="Ночь" style="background:linear-gradient(135deg,#0F1519 50%,#6CC4BF 50%)"></button>
+  <button class="sw" data-t="lavender" title="Лаванда" style="background:linear-gradient(135deg,#5B4BB7 50%,#F0907A 50%)"></button>
+  <button class="sw" data-t="sunset" title="Закат" style="background:linear-gradient(135deg,#C0553A 50%,#2F7D78 50%)"></button>
+</div>
+
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">23</div>
+    <h1>Вход в систему</h1>
+    <p>МАОУ СОШ №23, Екатеринбург</p>
+    <div class="role-tabs">
+      <button class="role-tab active" id="tab-student" onclick="selectRole('student')">Ученик</button>
+      <button class="role-tab" id="tab-teacher" onclick="selectRole('teacher')">Учитель</button>
+    </div>
+    <div class="field"><label>Логин</label><input type="text" id="username-input" placeholder="Введите ваш логин"></div>
+    <div class="field" id="password-field"><label>Пароль</label><input type="password" id="password-input" placeholder="Пароль учителя"></div>
+    <button class="login-btn" onclick="login()">Войти</button>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="mark">23</div>
+      <div><div class="name">Школа №23</div><div class="sub">Екатеринбург</div></div>
+    </div>
+    <div class="account-chip" id="accountChip">
+      <div class="av" id="accAv">?</div>
+      <div><div class="nm" id="accName">Гость</div><div class="rl" id="accRole">Ученик</div></div>
+    </div>
+  </div>
+  <div class="header-hero">
+    <div class="big23">23</div>
+    <h1>Образование, которое <em>открывает</em> новые возможности</h1>
+    <p>Современная школа в Академическом районе Екатеринбурга. Углублённое изучение наук, сильные педагоги, комфортная среда.</p>
+    <div class="header-stats">
+      <div class="header-stat"><div class="num">2016</div><div class="lbl">Год основания</div></div>
+      <div class="header-stat"><div class="num">3800+</div><div class="lbl">Учеников</div></div>
+      <div class="header-stat"><div class="num">56</div><div class="lbl">Кабинетов</div></div>
+      <div class="header-stat"><div class="num">500</div><div class="lbl">Мест в зале</div></div>
+    </div>
+  </div>
+</header>
+
+<nav class="site-nav"><div class="nav-inner">
+  <a href="#about" class="active">О школе</a>
+  <a href="#schedule">Расписание</a>
+  <a href="#communication">Чат и ИИ</a>
+  <a href="#contacts">Контакты</a>
+</div></nav>
+
+<section class="section" id="about">
+  <div class="section-head">
+    <div class="eyebrow">О школе</div>
+    <h2>Больше, чем просто уроки</h2>
+    <p>Мы создаём условия, в которых каждый ученик может раскрыть свой потенциал.</p>
+  </div>
+  <div class="info-grid">
+    <div class="info-card"><h3>История</h3><p>Школа открылась 1 сентября 2016 года в Академическом районе. За 10 лет стала одной из самых современных школ Урала.</p></div>
+    <div class="info-card"><h3>Инфраструктура</h3><p>56 кабинетов, бассейн, два спортзала, актовый зал на 500 мест и современный информационно-библиотечный центр.</p></div>
+    <div class="info-card"><h3>Достижения</h3><p>В 2021 году школа стала победителем Всероссийского конкурса «Лучшая инклюзивная школа России».</p></div>
+    <div class="info-card"><h3>Директор</h3><p>Михайлова Ольга Викторовна — руководит школой с момента основания. Почётный работник образования РФ.</p></div>
+  </div>
+</section>
+
+<section class="section" id="schedule">
+  <div class="section-head">
+    <div class="eyebrow">Учебный процесс</div>
+    <h2>Расписание звонков</h2>
+    <p>Первая смена: 1–11 классы. Начало занятий — 08:00.</p>
+  </div>
+  <div class="now" id="nowBar" hidden><span class="pulse"></span><span id="nowText"></span><div class="bar"><i id="nowFill"></i></div></div>
+  <div class="schedule-wrap">
+    <table class="schedule-table">
+      <thead><tr><th>Урок</th><th>Время</th><th>Перемена</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td class="time">08:00 – 08:40</td><td class="brk">10 минут</td></tr>
+        <tr><td class="num">2</td><td class="time">08:50 – 09:30</td><td class="brk">10 минут</td></tr>
+        <tr><td class="num">3</td><td class="time">09:40 – 10:20</td><td class="brk">10 минут</td></tr>
+        <tr><td class="num">4</td><td class="time">10:30 – 11:10</td><td class="brk">10 минут</td></tr>
+        <tr><td class="num">5</td><td class="time">11:20 – 12:00</td><td class="brk">10 минут</td></tr>
+        <tr><td class="num">6</td><td class="time">12:10 – 12:50</td><td class="brk">10 минут</td></tr>
+        <tr><td class="num">7</td><td class="time">13:00 – 13:40</td><td class="brk">10 минут</td></tr>
+        <tr><td class="num">8</td><td class="time">13:50 – 14:30</td><td class="brk">10 минут</td></tr>
+        <tr><td class="num">9</td><td class="time">14:40 – 15:20</td><td class="brk">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section" id="communication">
+  <div class="section-head">
+    <div class="eyebrow">Обратная связь</div>
+    <h2>Чат и ИИ-помощник</h2>
+    <p>Задайте вопрос в чате или спросите у ИИ — мы всегда на связи.</p>
+  </div>
+  <div class="comm-grid">
+    <div class="panel">
+      <div class="panel-head"><h3><span class="dot"></span> Общий чат</h3><span class="hint" id="chatHint">онлайн</span></div>
+      <div class="chat-body" id="chatMessages"></div>
+      <div class="chat-foot">
+        <div class="emo-wrap"><button type="button" class="emo-btn" id="emoBtn" aria-label="Эмодзи">☺</button><div class="emo-pop" id="emoPop"></div></div>
+        <input type="text" id="chatInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Отправить</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>ИИ-помощник</h3><span class="hint">демо</span></div>
+      <div class="ai-body">
+        <div class="chips" id="chips">
+          <button class="chip" data-q="Какие профили есть в школе?">Профили</button>
+          <button class="chip" data-q="Расписание звонков">Расписание</button>
+          <button class="chip" data-q="Адрес школы">Адрес</button>
+          <button class="chip" data-q="Телефон школы">Телефон</button>
+          <button class="chip" data-q="Кто директор?">Директор</button>
+        </div>
+        <textarea id="aiInput" placeholder="Например: Какие профили есть в школе?"></textarea>
+        <button class="ai-btn" onclick="askAI()">Спросить</button>
+        <div class="ai-answer" id="aiAnswer"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="contacts">
+  <div class="section-head">
+    <div class="eyebrow">Контакты</div>
+    <h2>Как нас найти</h2>
+  </div>
+  <div class="contact-grid">
+    <div class="contact-card"><div class="lbl">Адрес</div><div class="val">620016, г. Екатеринбург,<br>ул. Павла Шаманова, 54</div></div>
+    <div class="contact-card"><div class="lbl">Телефон</div><div class="val">(343) 301-10-23</div></div>
+    <div class="contact-card"><div class="lbl">Почта</div><div class="val">soch23@eduekb.ru</div></div>
+    <div class="contact-card"><div class="lbl">Сайт</div><div class="val">школа23.екатеринбург.рф</div></div>
+  </div>
+</section>
+
+<footer><strong>© 2026 МАОУ СОШ №23</strong>, г. Екатеринбург. Все права защищены.</footer>
+
+<script>
+let currentRole = 'student';
+let currentUsername = '';
+const USER_KEY = 'school23_user_v3';
+
+function selectRole(role) {
+  currentRole = role;
+  document.getElementById('tab-student').classList.toggle('active', role === 'student');
+  document.getElementById('tab-teacher').classList.toggle('active', role === 'teacher');
+  document.getElementById('password-field').classList.toggle('show', role === 'teacher');
+}
+function login() {
+  const username = document.getElementById('username-input').value.trim();
+  if (!username) { alert('Введите логин!'); return; }
+  if (currentRole === 'teacher') {
+    const password = document.getElementById('password-input').value;
+    if (password !== 'admin123') { alert('Неверный пароль учителя!'); return; }
+  }
+  currentUsername = username;
+  localStorage.setItem(USER_KEY, JSON.stringify({ username, role: currentRole }));
+  showAccount();
+  document.getElementById('login-screen').style.display = 'none';
+  initSocket();
+}
+function showAccount() {
+  document.getElementById('accName').textContent = currentUsername;
+  document.getElementById('accRole').textContent = currentRole === 'teacher' ? 'Учитель' : 'Ученик';
+  document.getElementById('accAv').textContent = currentUsername.charAt(0).toUpperCase();
+  document.getElementById('accountChip').style.display = 'flex';
+}
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem(USER_KEY);
+  if (saved) {
+    const user = JSON.parse(saved);
+    currentUsername = user.username;
+    currentRole = user.role || 'student';
+    showAccount();
+    document.getElementById('login-screen').style.display = 'none';
+    initSocket();
+  }
+  // подсветка пункта меню при прокрутке
+  const links = document.querySelectorAll('.nav-inner a');
+  const io2 = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  }), { rootMargin: '-40% 0px -55% 0px' });
+  document.querySelectorAll('section.section').forEach(s => io2.observe(s));
+});
+
+let socket = null;
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+
+function initSocket() {
+  socket = io();
+  socket.on('chatHistory', (history) => {
+    chatMessages.innerHTML = '';
+    history.forEach(msg => renderMessage(msg));
+  });
+  socket.on('newMessage', (msg) => { renderMessage(msg); });
+}
+function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text || !socket) return;
+  socket.emit('sendMessage', { text: text, author: currentUsername || 'Аноним', role: currentRole });
+  chatInput.value = '';
+}
+function renderMessage(msg) {
+  const isOwn = msg.author === currentUsername;
+  const div = document.createElement('div');
+  div.className = 'chat-msg' + (isOwn ? ' own' : '');
+  div.innerHTML = `
+    <div class="av">${escapeHtml((msg.author || '?').charAt(0).toUpperCase())}</div>
+    <div class="body">
+      <div class="meta"><span class="nm">${escapeHtml(msg.author || '')}</span><span class="tm">${escapeHtml(msg.time || '')}</span></div>
+      <div class="text">${escapeHtml(msg.text)}</div>
+    </div>`;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function askAI() {
+  const input = document.getElementById('aiInput').value.trim();
+  const answerBox = document.getElementById('aiAnswer');
+  if (!input) return;
+  answerBox.innerHTML = 'ИИ обрабатывает запрос <span class="dots"><i></i><i></i><i></i></span>';
+  answerBox.classList.add('show');
+  setTimeout(() => {
+    let answer = '';
+    const q = input.toLowerCase();
+    if (q.includes('профил')) answer = 'В школе №23 есть технологический, естественно-научный и социально-гуманитарный профили. Углублённо изучаются математика, физика, информатика, химия, биология и иностранные языки.';
+    else if (q.includes('расписан')) answer = 'Расписание звонков: 1 урок — 08:00–08:40, 2 — 08:50–09:30, 3 — 09:40–10:20, 4 — 10:30–11:10, 5 — 11:20–12:00, 6 — 12:10–12:50, 7 — 13:00–13:40, 8 — 13:50–14:30, 9 — 14:40–15:20.';
+    else if (q.includes('адрес') || q.includes('где')) answer = 'Школа находится по адресу: г. Екатеринбург, ул. Павла Шаманова, 54.';
+    else if (q.includes('телефон')) answer = 'Контактный телефон школы: (343) 301-10-23.';
+    else if (q.includes('директор')) answer = 'Директор школы — Михайлова Ольга Викторовна.';
+    else answer = 'Я могу рассказать о профилях, расписании, адресе, телефоне, директоре и истории школы. Спросите что-нибудь конкретное.';
+    typeOut(answerBox, answer);
+  }, 1000);
+}
+</script>
+
+<script>
+/* смена стиля */
+(function(){
+  const root = document.documentElement, KEY = 'school23_theme';
+  const btns = document.querySelectorAll('#themes .sw');
+  function apply(t){
+    root.dataset.theme = t;
+    btns.forEach(b => b.classList.toggle('on', b.dataset.t === t));
+    try { localStorage.setItem(KEY, t); } catch(e) {}
+  }
+  btns.forEach(b => b.addEventListener('click', () => apply(b.dataset.t)));
+  let saved = null; try { saved = localStorage.getItem(KEY); } catch(e) {}
+  apply(saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'teal'));
+  /* плавное появление блоков */
+  const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }), { threshold: .12 });
+  document.querySelectorAll('.section-head,.info-card,.schedule-wrap,.panel,.contact-card').forEach((el, i) => { el.classList.add('rv'); el.style.transitionDelay = (i % 4) * 70 + 'ms'; io.observe(el); });
+})();
+</script>
+
+<script>
+let _ty = 0;
+function typeOut(el, text) {
+  const id = ++_ty; let i = 0; el.textContent = '';
+  (function step() { if (id !== _ty) return; el.textContent = text.slice(0, ++i); if (i < text.length) setTimeout(step, 12); })();
+}
+(function () {
+  const $ = q => document.querySelector(q), $$ = q => document.querySelectorAll(q);
+  const toast = $('#toast'); let tt;
+  window.showToast = m => { toast.textContent = m; toast.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => toast.classList.remove('show'), 1800); };
+  $$('#themes .sw').forEach(b => b.addEventListener('click', () => showToast('Стиль: ' + b.title)));
+
+  const prog = $('#prog'), up = $('#toTop');
+  function onScroll() { const h = document.documentElement, m = h.scrollHeight - h.clientHeight; prog.style.width = (m > 0 ? h.scrollTop / m * 100 : 0) + '%'; up.classList.toggle('show', h.scrollTop > 600); }
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  up.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+
+  $$('.info-card,.contact-card,.header-stat').forEach(el => el.addEventListener('pointermove', e => {
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', e.clientX - r.left + 'px'); el.style.setProperty('--my', e.clientY - r.top + 'px');
+  }));
+
+  const hh = $('.site-header'), b23 = $('.big23');
+  hh.addEventListener('pointermove', e => {
+    const r = hh.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    b23.style.transform = `translate(${x * -34}px,${y * -22}px)`;
+  });
+
+  const co = new IntersectionObserver(es => es.forEach(x => {
+    if (!x.isIntersecting) return; co.unobserve(x.target);
+    const el = x.target, t = el.textContent, n = parseInt(t), suf = t.replace(/[0-9]/g, ''), from = n > 1900 ? n - 40 : 0, s0 = performance.now();
+    (function f(now) { const p = Math.min((now - s0) / 1400, 1), k = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(from + (n - from) * k) + suf; if (p < 1) requestAnimationFrame(f); })(s0);
+  }), { threshold: .6 });
+  $$('.header-stat .num').forEach(el => co.observe(el));
+
+  document.addEventListener('pointerdown', e => {
+    const b = e.target.closest('.login-btn,.chat-foot button,.ai-btn,.role-tab,.chip'); if (!b) return;
+    const r = b.getBoundingClientRect(), z = Math.max(r.width, r.height), i = document.createElement('span');
+    i.className = 'rip'; i.style.cssText = `width:${z}px;height:${z}px;left:${e.clientX - r.left - z / 2}px;top:${e.clientY - r.top - z / 2}px`;
+    b.appendChild(i); setTimeout(() => i.remove(), 600);
+  });
+
+  $$('#chips .chip').forEach(c => c.addEventListener('click', () => { $('#aiInput').value = c.dataset.q; askAI(); }));
+
+  const ep = $('#emoPop');
+  ['😀', '😂', '👍', '❤️', '🎉', '🙏', '🔥', '📚'].forEach(m => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = m;
+    b.onclick = () => { const i = $('#chatInput'); i.value += m; i.focus(); }; ep.appendChild(b);
+  });
+  $('#emoBtn').onclick = e => { e.stopPropagation(); ep.classList.toggle('open'); };
+  document.addEventListener('click', e => { if (!e.target.closest('.emo-wrap')) ep.classList.remove('open'); });
+
+  $$('.contact-card').forEach(c => {
+    c.title = 'Нажмите, чтобы скопировать';
+    c.addEventListener('click', () => {
+      const v = c.querySelector('.val').innerText;
+      (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => showToast('Скопировано'), () => showToast('Не удалось скопировать'));
+    });
+  });
+
+  const L = [[8,0,8,40],[8,50,9,30],[9,40,10,20],[10,30,11,10],[11,20,12,0],[12,10,12,50],[13,0,13,40],[13,50,14,30],[14,40,15,20]];
+  const S = l => l[0] * 60 + l[1], E = l => l[2] * 60 + l[3];
+  function tick() {
+    const p = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Yekaterinburg', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false })
+      .formatToParts(new Date()).reduce((a, x) => (a[x.type] = x.value, a), {});
+    const m = (+p.hour % 24) * 60 + +p.minute, bar = $('#nowBar'), rows = $$('.schedule-table tbody tr');
+    rows.forEach(r => r.classList.remove('now'));
+    if (p.weekday === 'Sun' || m >= 15 * 60 + 20 || m < 7 * 60) { bar.hidden = true; return; }
+    bar.hidden = false; let txt, pct = 0;
+    const i = L.findIndex(l => m >= S(l) && m < E(l));
+    if (i >= 0) { rows[i].classList.add('now'); txt = `Сейчас идёт ${i + 1} урок · до конца ${E(L[i]) - m} мин`; pct = (m - S(L[i])) / (E(L[i]) - S(L[i])) * 100; }
+    else { const j = L.findIndex(l => m < S(l)); txt = j === 0 ? 'Занятия начнутся в 08:00' : `Перемена · до ${j + 1} урока ${S(L[j]) - m} мин`; }
+    $('#nowText').textContent = txt; $('#nowFill').style.width = pct + '%';
+  }
+  tick(); setInterval(tick, 30000);
+})();
+</script>
+</body>
+</html>
